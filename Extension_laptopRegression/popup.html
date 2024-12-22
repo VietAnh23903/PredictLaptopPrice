@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Extension</title>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 10px; }
+   
+  </style>
+  
+</head>
+<body>
+  <h1>Dự báo giá laptop</h1>
+  <table>
+    <tr>
+      <td>
+        <label for="ram">Ram:</label>
+      </td>
+      <td>
+        <select id="ram">
+          <option value="4GB">4GB</option>
+          <option value="8GB">8GB</option>
+          <option value="16GB">16GB</option>
+          <option value="32GB">32GB</option>
+        </select> 
+      </td>
+    </tr>
+    <tr>
+      <td>  <label for="manhinh">Màn hình:</label>
+      </td>
+      <td>  <input type="text" id="manhinh" placeholder="inches..." />
+      </td>
+    </tr>
+    <tr>
+      <td>  <label for="ocung">Ổ cứng:</label>
+      </td>
+      <td><select id="ocung">
+        <option value="128GB">128GB</option>
+        <option value="256GB">256GB</option>
+        <option value="512GB">512GB</option>
+        <option value="1T">1T</option>
+      </select></td>
+      <td><select id="type">
+        <option value="SSD">SSD</option>
+        <option value="HDD">HDD</option>
+      </select></td>
+    </tr>
+    <tr>
+      <td colspan="2"><button id="dudoan">Dự đoán</button></td>
+    </tr>
+  </table> 
+  <p>Giá dự đoán: </p>
+  <p id="Gia"></p>
+  <script src="popup.js"></script>
+</body>
+</html>
