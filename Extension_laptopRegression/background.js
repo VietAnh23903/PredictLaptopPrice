@@ -29,44 +29,8 @@ chrome.runtime.onInstalled.addListener(() => {
       const selectedText = info.selectionText; // Lấy đoạn văn bản bôi đen
       if (selectedText) {
         // Chèn thông báo "Đang dự báo" với icon
-        chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: () => {
-            const loaderDiv = document.createElement("div");
-            loaderDiv.id = "loading-overlay";
-            loaderDiv.style.position = "fixed";
-            loaderDiv.style.top = "0";
-            loaderDiv.style.left = "0";
-            loaderDiv.style.width = "100vw";
-            loaderDiv.style.height = "100vh";
-            loaderDiv.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-            loaderDiv.style.display = "flex";
-            loaderDiv.style.alignItems = "center";
-            loaderDiv.style.justifyContent = "center";
-            loaderDiv.style.zIndex = "9999";
-            loaderDiv.innerHTML = `
-              <div style="text-align: center; color: white;">
-                <div class="spinner" style="
-                  width: 50px;
-                  height: 50px;
-                  border: 5px solid rgba(255, 255, 255, 0.3);
-                  border-radius: 50%;
-                  border-top-color: white;
-                  animation: spin 1s ease-in-out infinite;
-                "></div>
-                <p>Đang dự báo...</p>
-              </div>
-              <style>
-                @keyframes spin {
-                  to {
-                    transform: rotate(360deg);
-                  }
-                }
-              </style>
-            `;
-            document.body.appendChild(loaderDiv);
-          }
-        });
+        
+        // mã hóa text để giải mã bên phía server 
         let encodedText = encodeURIComponent(selectedText)
 
         // Gửi đoạn văn bản đến API
@@ -80,22 +44,42 @@ chrome.runtime.onInstalled.addListener(() => {
           .then((response) => response.json())
           .then((data) => {
             // Xóa thông báo "Đang load"
-            chrome.scripting.executeScript({
-              target: { tabId: tab.id },
-              func: () => {
-                const loaderDiv = document.getElementById("loading-overlay");
-                if (loaderDiv) loaderDiv.remove();
-              }
-            });
-  
-            // Hiển thị kết quả trả về từ API
-            chrome.scripting.executeScript({
-              target: { tabId: tab.id },
-              func: (result) => {
-                alert(`Kết quả xử lý: ${result}`);
-              },
-              args: [JSON.stringify(data)]
-            });
+            // chrome.scripting.executeScript({
+            //   target: { tabId: tab.id },
+            //   func: () => {
+            //     const loaderDiv = document.getElementById("loading-overlay");
+            //     if (loaderDiv) loaderDiv.remove();
+            //   }
+            // });
+            var check = data.check;
+            var input = data.input_text;
+            
+            if(check == 1){
+              var predictPrice = data.predicted_price;
+              var mse = data.mse
+              var r2= data.r2
+              // Hiển thị kết quả trả về từ API
+              chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                func: (input, predictPrice, mse, r2) => {
+                  alert(`Dữ liệu đầu vào: ${JSON.stringify(input, null, 2)}\n
+                    Giá laptop dự đoán: ${predictPrice} VND\n 
+                    MSE: ${mse}\n
+                    R2: ${r2}`);
+                },
+                args: [input, predictPrice, mse, r2]
+              });
+            }
+            else{
+              chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                func: (result) => {
+                  alert(`${result}`);
+                },
+                args: [input]
+              });
+            }
+            
           })
           .catch((error) => {
             console.error("Lỗi khi gọi API:", error);
