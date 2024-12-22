@@ -1,4 +1,4 @@
-##Hươnngs dẫn cài đặt;
+## Hướng dẫn cài đặt;
   - Clone repo này vê
   - Lên chrome và vào mục "manager extesion"
   - Bật mode "develop" và load folder "Extension_laptopRegression"
