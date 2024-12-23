@@ -24,10 +24,10 @@ def chuyen_thuong_hieu_thanh_hang(df, column, text):
 
     # Ví dụ: Chuyển 'name brand' thành hạng
       # Thay đổi theo thương hiệu bạn muốn kiểm tra
-    default = 1 if column == 'GPU' else 1
+    default = 1 if column == 'GPU' else 100
 
     gpu_ranks = text.apply(
-        lambda x: brand_rank_dict.get(x, 1))  # 'UHD' là giá trị mặc định nếu không tìm thấy
+        lambda x: brand_rank_dict.get(x, default))  # 'UHD' là giá trị mặc định nếu không tìm thấy
 
     return gpu_ranks
 

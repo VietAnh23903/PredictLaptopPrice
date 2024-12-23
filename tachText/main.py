@@ -26,12 +26,15 @@ def extract_specs(data):
 
     if ram_match:
         specs['RAM'] = ram_match.group(1).strip()+'GB'
+    else:
+        return False
 
     # Tìm ổ cứng (SSD và HDD)
     storage_match = re.findall(r"(([Ổổ] cứng)|Lưu trữ|Dung lượng|Hard drive)[:\s]+(\w+\s+\w+)", data)
     if storage_match:
         specs['SSD'] = ', '.join(match[2] for match in storage_match)
-
+    else:
+        return False
     # Tìm VGA
         # vga_match = re.search(r'(VGA|Card)\s([^\n]*)', data)
         # if vga_match:
@@ -41,11 +44,13 @@ def extract_specs(data):
     screen_match = re.search(r"(màn hình|M.Hình|M.Figure)\s*(.*?)\s*(inches|inch|\"|$)", data)
     if screen_match:
         specs['Display'] = screen_match.group(2).strip()
-
+    else:
+        return False
     gpu_match = re.search(r'Card(.*?)(M.Figure|M.Hình)', data, re.IGNORECASE)
     if gpu_match:
         specs['GPU'] = gpu_match.group(1).strip()
-
+    else:
+        return False
     specs = filt_number(specs)
     update_gpu(specs)
     return specs
@@ -56,20 +61,25 @@ def filt_number(specs):
     # Lọc RAM: Giữ lại số GB
     if 'RAM' in filtered_specs:
         filtered_specs['RAM'] = re.search(r'\d+', filtered_specs['RAM']).group()
-
+    else:
+        return False
     # Lọc Display: Giữ lại kích thước màn hình
     if 'Display' in filtered_specs:
         filtered_specs['Display'] = re.search(r'[\d.]+', filtered_specs['Display']).group()
-
+    else:
+        return False
     # Lọc SSD: Giữ lại dung lượng ổ cứng
     if 'SSD' in filtered_specs:
         filtered_specs['SSD'] = re.search(r'\d+', filtered_specs['SSD']).group()
-
+    else:
+        return False
     # Lọc GPU: Giữ lại từ đầu tiên (ví dụ "Radeon")
     if 'GPU' in filtered_specs:
         gpu_parts = filtered_specs['GPU'].split(' ')
         if(gpu_parts[0] != "RTX" and gpu_parts[0] != "Radeon"):
             filtered_specs['GPU'] = ' '.join(gpu_parts[1:]) # Giữ lại chữ đầu tiên
+    else:
+        return False
     return filtered_specs
 
 def update_gpu(specs):
@@ -109,32 +119,41 @@ def du_bao_gia_api():
     print(decoded_text)
     print(type(decoded_text))
     data2 = extract_specs(decoded_text)
-    print(type(data2))
     print(data2)
-    data = pd.DataFrame([data2],index=[0])
-    print(data)
-    price, mse, r2 = dubao.dubao_gia(data)
+    if(data2!=False):
+        print(type(data2))
+        print(data2)
+        data = pd.DataFrame([data2],index=[0])
+        print(data)
+        price, mse, r2 = dubao.dubao_gia(data)
 
-    if isinstance(mse, np.ndarray):
-        mse_value = mse.sum()  # hoặc mse.mean() tùy vào yêu cầu của bạn
-    else:
-        mse_value = mse
-    if isinstance(r2, np.ndarray):
-        r2_value = r2.sum()  # hoặc mse.mean() tùy vào yêu cầu của bạn
-    else:
-        r2_value = r2
-    #predic, mse,r2= dubao.dubao_gia(data2)
-    # Logic xử lý văn bản (ví dụ: Dự báo giá)
-    # Ở đây, mình chỉ trả về chiều dài của văn bản làm ví dụ
-    # predicted_price = predic  # Ví dụ: giá mỗi ký tự = 1000
+        if isinstance(mse, np.ndarray):
+            mse_value = mse.sum()  # hoặc mse.mean() tùy vào yêu cầu của bạn
+        else:
+            mse_value = mse
+        if isinstance(r2, np.ndarray):
+            r2_value = r2.sum()  # hoặc mse.mean() tùy vào yêu cầu của bạn
+        else:
+            r2_value = r2
+        #predic, mse,r2= dubao.dubao_gia(data2)
+        # Logic xử lý văn bản (ví dụ: Dự báo giá)
+        # Ở đây, mình chỉ trả về chiều dài của văn bản làm ví dụ
+        # predicted_price = predic  # Ví dụ: giá mỗi ký tự = 1000
 
-    # Trả về kết quả
-    return jsonify({
-        "input_text": data2,
-        "predicted_price":price.sum(),
-        "mse":mse_value,
-        "r2":r2_value
-    })
+        # Trả về kết quả
+        return jsonify({
+            "check":"1",
+            "input_text": data2,
+            "predicted_price":price.sum()* 85/1000000,
+            "mse":mse_value,
+            "r2":r2_value
+        })
+    else:
+        return jsonify({
+            "check" : "0",
+            "input_text": "Dữ liệu không đủ",
+
+        })
 # Chạy server
 
 if __name__ == '__main__':

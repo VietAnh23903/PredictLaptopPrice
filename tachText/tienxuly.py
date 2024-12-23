@@ -1,5 +1,6 @@
 import re
-
+# Chạy tienxuLy_for_gpu trước
+# sau đo chạy file này
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
@@ -10,8 +11,7 @@ def chuyen(df, column):
     brand_avg_price = df.groupby(column)['Price'].mean()
 
     # Sắp xếp các giá trị trung bình của 'Price' theo thứ tự tăng dần (hoặc giảm dần)
-    brand_avg_price_sorted = brand_avg_price.sort_values(
-        ascending=False)  # ascending=False để sắp xếp theo giá cao nhất
+    brand_avg_price_sorted = brand_avg_price.sort_values(ascending=False)  # ascending=False để sắp xếp theo giá cao nhất
 
     # Gán hạng cho từng thương hiệu (hạng 1 cho brand có giá cao nhất, hạng 2 cho brand có giá thấp hơn, v.v.)
     brand_ranks = brand_avg_price_sorted.rank(ascending=True)  # rank theo thứ tự giá tăng dần
@@ -22,7 +22,7 @@ def chuyen(df, column):
     # Áp dụng hạng vào DataFrame
     df[column] = df[column].map(brand_rank_dict)
 
-def preprocess_laptop_data(df, check):
+def preprocess_laptop_data(df):
     # 1. Xử lý giá trị khuyết thiếu
     for col in df.columns:
         if df[col].isnull().sum() > 0:  # Chỉ xử lý các cột có giá trị thiếu
@@ -37,8 +37,10 @@ def preprocess_laptop_data(df, check):
     if 'Display_type' in df.columns:
         encoder = LabelEncoder()
         df['Display_type'] = encoder.fit_transform(df['Display_type'])
+
     if 'RAM' in df.columns:
         df['RAM'] = pd.to_numeric(df['RAM'].str.extract(r'(\d+)', expand=False), errors='coerce')
+
     if 'SSD' in df.columns:
         # Trích xuất dung lượng SSD
         df['SSD'] = df['SSD'].str.extract(r'(\d+)').fillna(0).astype(int)
@@ -47,15 +49,14 @@ def preprocess_laptop_data(df, check):
         df['HDD'] = df['HDD'].str.extract(r'(\d+)').fillna(0).astype(int)
     if 'GPU' in df.columns:
         df['GPU'] = df['GPU'].apply(
-            lambda x: re.search(r"GeForce\s(.*?)\sGPU", x).group(1) if re.search(r"GeForce\s(.*?)\sGPU",
-                                                                                x) else x)
+            lambda x: re.search(r"GeForce\s(.*?)\sGPU", x).group(1) if re.search(r"GeForce\s(.*?)\sGPU",x) else x)
+        print("so dong tr", df.shape[0])
+# chỗ nãy lưu ra 1 file dùng để dự báo randomforest    trước khi chuyển hết dữ lieeujh string sang float
         df.to_csv('laptop_for_dubao.csv')
         chuyen(df,'GPU')
+    print(df.shape[0])
     # 2. Làm sạch và trích xuất dữ liệu số
-    if 'Battery_Life' in df.columns:
-        # Trích xuất số giờ từ chuỗi và chuyển đổi thành kiểu float
-        df['Battery_Life'] = df['Battery_Life'].str.extract(r'(\d+\.?\d*)').astype(float)
-        df = df[df['Battery_Life'] < 30]
+
 
     if 'Processor_Name' in df.columns:
         # Trích xuất dòng chip từ tên bộ xử lý
@@ -73,28 +74,33 @@ def preprocess_laptop_data(df, check):
     if 'Processor_Brand' in df.columns:
         chuyen(df,'Processor_Brand')
     if 'GPU_Brand' in df.columns:
+
+
         chuyen(df, 'GPU_Brand')
+    print("so dong", df.shape[0])
     # 4. Loại bỏ các cột không cần thiết
-    columns_to_drop = ['Unnamed: 0','Brand', 'Name', 'Processor_Series','Processor_Name', 'RAM_TYPE','Adapter', 'RAM_Expandable']
+    columns_to_drop = ['Unnamed: 0','Brand', 'Name', 'Processor_Series','Processor_Name', 'RAM_TYPE','Adapter', 'RAM_Expandable','Battery_Life']
     for col in columns_to_drop:
         if col in df.columns:
             df.drop(columns=[col], inplace=True)
+    print("so dong", df.shape[0])
+    df.drop(columns=['Unnamed: 0.1'], inplace=True)
+    df.to_csv("laptop_complete_no_zscore.csv", index=False)
 
-    if(check == True):
     # 5. Áp dụng Z-Score cho toàn bộ cột số
-        numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
-        df[numeric_columns] = df[numeric_columns].apply(zscore)
-        df.to_csv("laptop_complete_with_zscore.csv", index=False)
-    else:
-        df.to_csv("laptop_complete_no_zscore.csv", index=False)
-    return df
+    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    df[numeric_columns] = df[numeric_columns].apply(zscore)
+    df.to_csv("laptop_complete_with_zscore.csv", index=False)
+
+
+
 
 
 # Đọc dữ liệu từ tệp
-data = pd.read_csv("laptop.csv")
+data = pd.read_csv("laptop_fix_gpu.csv")
 # Gọi hàm tiền xử lý dữ liệu
 
-processed_data = preprocess_laptop_data(data,True)
+processed_data = preprocess_laptop_data(data)
 
 # Kiểm tra dữ liệu sau khi xử lý và chuẩn hóa
 # print(processed_data['Ghz'])
