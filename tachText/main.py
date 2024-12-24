@@ -144,7 +144,7 @@ def du_bao_gia_api():
         return jsonify({
             "check":"1",
             "input_text": data2,
-            "predicted_price":price.sum()* 85/1000000,
+            "predicted_price":price.sum() * 85 / 1000000,
             "mse":mse_value,
             "r2":r2_value
         })

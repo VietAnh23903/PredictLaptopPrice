@@ -62,9 +62,9 @@ chrome.runtime.onInstalled.addListener(() => {
               chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 func: (input, predictPrice, mse, r2) => {
-                  alert(`Dữ liệu đầu vào: ${JSON.stringify(input, null, 2)}\n
-                    Giá laptop dự đoán: ${predictPrice} VND\n 
-                    MSE: ${mse}\n
+                  alert(`Dữ liệu đầu vào: ${JSON.stringify(input, null, 2)}
+                    Giá laptop dự đoán: ${predictPrice} VND
+                    MSE: ${mse}
                     R2: ${r2}`);
                 },
                 args: [input, predictPrice, mse, r2]

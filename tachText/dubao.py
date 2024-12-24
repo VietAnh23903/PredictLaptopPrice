@@ -58,6 +58,7 @@ def random_forest_model(df, target_column, n_estimators=100, test_size=0.2, rand
         mse: Mean Squared Error (MSE) trên tập kiểm tra.
     """
 
+    #thực hiện xóa các cột không cần thiết
     remove_rows_with_str(df)
     print(df)
     # Chọn cột phụ thuộc (y) và cột độc lập (X)
@@ -85,8 +86,8 @@ df = pd.read_csv('laptop_complete_with_zscore.csv')
 print(df)
 
 model, mse, r2 = random_forest_model(df, target_column='Price')
-print('Độ lệch của dữ liệu so với thực tế:',mse*10)
-print ('chính xác:', r2)
+print('MSE:',mse)
+print ('R2:', r2)
 # new_data = pd.DataFrame({
 #
 #     'RAM': [8],
