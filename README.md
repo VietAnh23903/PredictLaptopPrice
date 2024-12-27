@@ -24,6 +24,7 @@
   - Chuột phải sẽ hiển thị extension dự đoán giá
   - Nhấn vào và sẽ hiển thị thông tin dự báo
 ## Chú thích
-  - Chưa hoàn thành
+  - Chỉ test lấy dữ liệu chuẩn xác ở https://laptop88.vn/
+  - Chưa hoàn chỉnh
   - Thêm giao điện hiển thị giá
   - Thêm giao diên cho  extension
